@@ -4,31 +4,52 @@
 <title>DadAndrian AI Studio</title>
 
 <style>
-
 body{
-font-family:Arial;
-background:linear-gradient(135deg,#1e1e1e,#000);
-color:white;
-text-align:center;
-padding:40px;
+  font-family: Arial;
+  background: linear-gradient(135deg,#1e1e1e,#000);
+  color:white;
+  text-align:center;
+  padding:40px;
 }
 
 h1{
-font-size:40px;
+  font-size:40px;
+  margin-bottom:10px;
+}
+
+section{
+  margin:30px 0;
+  padding:20px;
+  border:2px solid #00ffcc;
+  border-radius:15px;
 }
 
 button{
-padding:15px 25px;
-margin:10px;
-font-size:18px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-background:#00ffcc;
+  padding:12px 20px;
+  margin:10px;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#00ffcc;
 }
 
 button:hover{
-background:#00ccaa;
+  background:#00ccaa;
+}
+
+textarea{
+  width:80%;
+  height:60px;
+  border-radius:10px;
+  border:none;
+  padding:10px;
+  font-size:16px;
+}
+
+audio, iframe{
+  margin-top:10px;
+  border-radius:10px;
 }
 
 </style>
@@ -37,24 +58,73 @@ background:#00ccaa;
 <body>
 
 <h1>🎵 DadAndrian AI Studio</h1>
-
 <p>Music • Lyrics • Video • AI Creation</p>
 
-<button onclick="alert('Lyrics Generator bientôt disponible')">
-Lyrics Generator
-</button>
+<!-- Section Lyrics -->
+<section>
+<h2>Lyrics Generator</h2>
+<textarea id="lyricsInput" placeholder="Entrer un thème..."></textarea><br>
+<button onclick="generateLyrics()">Générer Lyrics</button>
+<p id="lyricsOutput"></p>
+</section>
 
-<button onclick="alert('Music AI bientôt disponible')">
-Music Generator
-</button>
+<!-- Section Music -->
+<section>
+<h2>Music AI Demo</h2>
+<button onclick="playMusic()">Play Music</button>
+<audio id="musicPlayer" controls></audio>
+</section>
 
-<button onclick="alert('Video AI bientôt disponible')">
-Video Generator
-</button>
+<!-- Section Video -->
+<section>
+<h2>Video AI Demo</h2>
+<button onclick="playVideo()">Play Video</button>
+<iframe id="videoFrame" width="480" height="270" src="" frameborder="0" allowfullscreen></iframe>
+</section>
 
-<button onclick="alert('Streaming bientôt disponible')">
-Free Streaming
-</button>
+<!-- Section Streaming -->
+<section>
+<h2>Free Streaming Demo</h2>
+<button onclick="playStreaming()">Watch Stream</button>
+<iframe id="streamFrame" width="480" height="270" src="" frameborder="0" allowfullscreen></iframe>
+</section>
+
+<script>
+// ===== Lyrics Generator Demo =====
+function generateLyrics(){
+  const theme = document.getElementById("lyricsInput").value || "amour";
+  const examples = [
+    `Voici une chanson sur ${theme}, avec des étoiles et la lune...`,
+    `Parlons de ${theme}, sous un ciel infini...`,
+    `${theme} dans mon cœur, je ne peux oublier...`,
+    `La mélodie de ${theme} résonne dans la nuit...`
+  ];
+  const output = examples[Math.floor(Math.random()*examples.length)];
+  document.getElementById("lyricsOutput").innerText = output;
+}
+
+// ===== Music AI Demo =====
+function playMusic(){
+  const player = document.getElementById("musicPlayer");
+  // fichier audio gratuit demo
+  player.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+  player.play();
+}
+
+// ===== Video AI Demo =====
+function playVideo(){
+  const frame = document.getElementById("videoFrame");
+  // vidéo demo YouTube
+  frame.src = "https://www.youtube.com/embed/dQw4w9WgXcQ";
+}
+
+// ===== Streaming Demo =====
+function playStreaming(){
+  const frame = document.getElementById("streamFrame");
+  // exemple chaîne gratuite publique
+  frame.src = "https://www.youtube.com/embed/live_stream?channel=UC4R8DWoMoI7CAwX8_LjQHig";
+}
+</script>
 
 </body>
 </html>
