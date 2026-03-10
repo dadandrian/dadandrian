@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASTERING ASSISTANT PRO · CHARGEMENT CORRIGÉ</title>
+    <!-- lamejs pour l'encodage MP3 -->
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0a0c0f;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e6ecf5;
+        }
+        .master-brain {
+            max-width: 1600px;
+            width: 100%;
+            background: #151a21;
+            border-radius: 40px;
+            box-shadow: 0 30px 60px -15px black;
+            padding: 28px;
+            border: 1px solid #3d4550;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header h1 {
+            font-weight: 500;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #e0eaf5, #b0c0d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .badge {
+            background: #242b34;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            border: 1px solid #4a5563;
+            color: #bac8dc;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .file-card {
+            background: #1b2129;
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid #3a404b;
+            box-shadow: inset 0 2px 5px #0b0e12;
+        }
+        .file-card h3 {
+            font-weight: 400;
+            color: #9dadc2;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .file-label {
+            background: #2b323d;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid #58616e;
+            transition: 0.1s;
+        }
+        .file-label:hover {
+            background: #36404d;
+        }
+        .file-label input {
+            display: none;
+        }
+        .fname {
+            background: #13171f;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #b2c2d6;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            border: 1px solid #353e4a;
+        }
+        .play-stop-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-sm {
+            background: #2a313c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #d3dce8;
+            cursor: pointer;
+            border: 1px solid #525e6d;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .btn-sm.primary {
+            background: #3c485b;
+            border-color: #7d8da0;
+        }
+        .btn-sm:active { transform: translateY(2px); }
+
+        .main-panel {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+        .viz-panel {
+            background: #13181f;
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid #323a45;
+        }
+        .canvas-container {
+            background: #0e1117;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #2b323d;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #11151c;
+            border-radius: 10px;
+        }
+        .controls-panel {
+            background: #13181f;
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid #323a45;
+        }
+        .control-section {
+            background: #1b222b;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .slider-row label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: #aebed3;
+        }
+        .slider-row input[type=range] {
+            flex: 1;
+            height: 6px;
+            background: #2f3846;
+            border-radius: 10px;
+        }
+        .slider-row .value {
+            min-width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #c6d4e6;
+        }
+        .analyzer-row {
+            display: flex;
+            justify-content: space-between;
+            background: #1f2731;
+            padding: 10px 14px;
+            border-radius: 30px;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        .meter {
+            color: #6cf0b0;
+            font-weight: 600;
+        }
+        .meter.warning { color: #f0b06c; }
+        .meter.good { color: #6cf0b0; }
+        .meter.bad { color: #f06c6c; }
+
+        /* assistant IA */
+        .ia-assistant {
+            background: #0e1a24;
+            border-radius: 28px;
+            padding: 22px;
+            margin-top: 28px;
+            border: 1px solid #3f5568;
+            background-image: radial-gradient(circle at 10% 20%, #1a3343, #0b131e);
+        }
+        .ia-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .ia-header span {
+            background: #0066aa;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .ia-message {
+            background: #0f1c27;
+            padding: 18px 24px;
+            border-radius: 30px;
+            border-left: 6px solid #2d9cdb;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #d6e6ff;
+            box-shadow: 0 4px 12px black;
+        }
+        .ia-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
+        .button {
+            background: #2b3543;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #eef4fc;
+            cursor: pointer;
+            border: 1px solid #687686;
+        }
+        .button.primary {
+            background: #1f4b6e;
+            border-color: #78a9d4;
+        }
+        .export-bar {
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .status {
+            color: #8f9fb2;
+            flex: 1;
+        }
+        .error-badge {
+            background: #a13d3d;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="master-brain">
+        <div class="header">
+            <h1>MASTERING ASSISTANT PRO <span class="badge">IA temps réel · métriques précises</span></h1>
+            <div class="badge">🎧 analyse comparative</div>
+        </div>
+
+        <!-- 3 fichiers : original, référence, master -->
+        <div class="file-grid">
+            <!-- Carte ORIGINAL -->
+            <div class="file-card">
+                <h3>🔹 PISTE ORIGINALE</h3>
+                <div class="file-row">
+                    <label class="file-label">
+                        <input type="file" id="loadOriginal" accept=".wav,.mp3,.aiff,.flac,audio/*"> charger
+                    </label>
+                    <span class="fname" id="origName">—</span>
+                </div>
+                <div class="play-stop-group">
+                    <button class="btn-sm" id="playOrigBtn">▶️ PLAY</button>
+                    <button class="btn-sm" id="stopBtn">⏹️ STOP</button>
+                </div>
+                <div class="analyzer-row"><span>RMS intégré</span> <span id="origRMS">-∞ dB</span></div>
+                <div class="analyzer-row"><span>LUFS intégré</span> <span id="origLUFS">-∞ LUFS</span></div>
+                <div class="analyzer-row"><span>Crête</span> <span id="origPeak">-∞ dB</span></div>
+            </div>
+            <!-- Carte RÉFÉRENCE -->
+            <div class="file-card">
+                <h3>🔸 RÉFÉRENCE (master pro)</h3>
+                <div class="file-row">
+                    <label class="file-label">
+                        <input type="file" id="loadRef" accept=".wav,.mp3,.aiff,.flac,audio/*"> charger
+                    </label>
+                    <span class="fname" id="refName">—</span>
+                </div>
+                <div class="play-stop-group">
+                    <button class="btn-sm" id="playRefBtn">▶️ PLAY</button>
+                    <button class="btn-sm" id="stopBtn2">⏹️ STOP</button>
+                </div>
+                <div class="analyzer-row"><span>RMS intégré</span> <span id="refRMS">-∞ dB</span></div>
+                <div class="analyzer-row"><span>LUFS intégré</span> <span id="refLUFS">-∞ LUFS</span></div>
+                <div class="analyzer-row"><span>Crête</span> <span id="refPeak">-∞ dB</span></div>
+            </div>
+            <!-- Carte MASTER (en cours) -->
+            <div class="file-card">
+                <h3>🔹 MASTER (temps réel)</h3>
+                <div class="file-row">
+                    <span class="fname" id="masterName">sortie du processeur</span>
+                </div>
+                <div class="play-stop-group">
+                    <button class="btn-sm primary" id="playMasterBtn">▶️ PLAY MASTER</button>
+                    <button class="btn-sm" id="stopBtn3">⏹️ STOP</button>
+                </div>
+                <div class="analyzer-row"><span>RMS (200ms)</span> <span id="masterRMS" class="meter">-∞ dB</span></div>
+                <div class="analyzer-row"><span>LUFS court</span> <span id="masterLUFS" class="meter">-∞ LUFS</span></div>
+                <div class="analyzer-row"><span>Crête</span> <span id="masterPeak" class="meter">-∞ dB</span></div>
+            </div>
+        </div>
+
+        <!-- Panneau principal : visu + contrôles -->
+        <div class="main-panel">
+            <div class="viz-panel">
+                <h3>🌊 OSCILLOSCOPE (master)</h3>
+                <div class="canvas-container">
+                    <canvas id="oscilloscope" width="650" height="150"></canvas>
+                </div>
+                <h3>📊 SPECTRE (master)</h3>
+                <div class="canvas-container">
+                    <canvas id="spectrum" width="650" height="150"></canvas>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h4>🎚️ EQ 3 bandes</h4>
+                    <div class="slider-row"><label>BASS</label><input type="range" id="eqLow" min="-12" max="12" value="0" step="0.5"><span class="value" id="eqLowVal">0.0 dB</span></div>
+                    <div class="slider-row"><label>MID</label><input type="range" id="eqMid" min="-12" max="12" value="0" step="0.5"><span class="value" id="eqMidVal">0.0 dB</span></div>
+                    <div class="slider-row"><label>TREBLE</label><input type="range" id="eqHigh" min="-12" max="12" value="0" step="0.5"><span class="value" id="eqHighVal">0.0 dB</span></div>
+                </div>
+                <div class="control-section">
+                    <h4>⚙️ COMPRESSEUR</h4>
+                    <div class="slider-row"><label>THRESH</label><input type="range" id="compThreshold" min="-40" max="0" value="-18" step="1"><span class="value" id="compThresholdVal">-18 dB</span></div>
+                    <div class="slider-row"><label>RATIO</label><input type="range" id="compRatio" min="1" max="20" value="4" step="0.5"><span class="value" id="compRatioVal">4.0:1</span></div>
+                    <div class="slider-row"><label>ATTACK</label><input type="range" id="compAttack" min="0" max="100" value="10" step="1"><span class="value" id="compAttackVal">10 ms</span></div>
+                    <div class="slider-row"><label>RELEASE</label><input type="range" id="compRelease" min="10" max="500" value="150" step="5"><span class="value" id="compReleaseVal">150 ms</span></div>
+                </div>
+                <div class="control-section">
+                    <h4>🔨 GAIN / LIMITEUR</h4>
+                    <div class="slider-row"><label>INPUT</label><input type="range" id="inputGain" min="-12" max="12" value="0" step="0.5"><span class="value" id="inputGainVal">0.0 dB</span></div>
+                    <div class="slider-row"><label>OUTPUT</label><input type="range" id="outputGain" min="-6" max="12" value="0" step="0.5"><span class="value" id="outputGainVal">0.0 dB</span></div>
+                    <div class="slider-row"><label>LIMIT</label><input type="range" id="limiterThresh" min="-20" max="0" value="-1.0" step="0.5"><span class="value" id="limiterThreshVal">-1.0 dB</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSISTANT IA + ANALYSE -->
+        <div class="ia-assistant">
+            <div class="ia-header">
+                <span>🧠 MASTERING ASSISTANT · analyse en continu</span>
+                <span style="background:#2c5f8a;">conseils temps réel</span>
+            </div>
+            <div class="ia-message" id="iaMessage">
+                Charger un original et une référence pour obtenir des conseils IA dynamiques.
+            </div>
+            <div class="ia-actions">
+                <button class="button" id="analyzeNowBtn">🔍 ANALYSE COMPLÈTE</button>
+                <button class="button primary" id="autoOptimizeBtn">⚡ OPTIMISATION AUTO</button>
+                <button class="button" id="resetSettingsBtn">↺ RÉINITIALISER</button>
+            </div>
+        </div>
+
+        <!-- Export et status -->
+        <div class="export-bar">
+            <span class="status" id="statusMessage">⚡ prêt</span>
+            <button class="button" id="exportWavBtn" disabled>EXPORTER WAV</button>
+            <button class="button primary" id="exportMp3Btn" disabled>EXPORTER MP3</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- ÉTAT GLOBAL ----------
+            let audioContext = null;
+            let originalBuffer = null;
+            let refBuffer = null;
+            let activeSource = null;
+            
+            // Noeux master temps réel
+            let inputGainNode, eqLowFilter, eqMidFilter, eqHighFilter, compressor, limiter, outputGainNode;
+            let analyserTime, analyserFreq;
+            
+            // Animation
+            let animFrame = null;
+            
+            // Métriques lissées
+            let smoothedRMS = -200;
+            let smoothedPeak = -200;
+            const HISTORY_SIZE = 10;
+            let rmsHistory = new Array(HISTORY_SIZE).fill(-200);
+            let peakHistory = new Array(HISTORY_SIZE).fill(-200);
+            let historyIndex = 0;
+
+            // Paramètres courants
+            const params = {
+                inputGain: 0, eqLow: 0, eqMid: 0, eqHigh: 0,
+                compThreshold: -18, compRatio: 4, compAttack: 10, compRelease: 150,
+                limiterThresh: -1.0, outputGain: 0
+            };
+
+            // Métriques statiques
+            let originalRMS = -Infinity, originalLUFS = -Infinity, originalPeak = -Infinity;
+            let refRMS = -Infinity, refLUFS = -Infinity, refPeak = -Infinity;
+
+            // Éléments DOM
+            const origName = document.getElementById('origName');
+            const refName = document.getElementById('refName');
+            const statusMsg = document.getElementById('statusMessage');
+            const iaMessage = document.getElementById('iaMessage');
+            
+            const masterRMSelm = document.getElementById('masterRMS');
+            const masterLUFSelm = document.getElementById('masterLUFS');
+            const masterPeakElm = document.getElementById('masterPeak');
+
+            // Boutons
+            const stopBtns = [document.getElementById('stopBtn'), document.getElementById('stopBtn2'), document.getElementById('stopBtn3')];
+            const playOrig = document.getElementById('playOrigBtn');
+            const playRef = document.getElementById('playRefBtn');
+            const playMaster = document.getElementById('playMasterBtn');
+
+            // Fichiers
+            document.getElementById('loadOriginal').addEventListener('change', loadOriginalFile);
+            document.getElementById('loadRef').addEventListener('change', loadRefFile);
+
+            // Canvas
+            const oscCanvas = document.getElementById('oscilloscope');
+            const specCanvas = document.getElementById('spectrum');
+            const oscCtx = oscCanvas.getContext('2d');
+            const specCtx = specCanvas.getContext('2d');
+
+            // Export buttons
+            const exportWav = document.getElementById('exportWavBtn');
+            const exportMp3 = document.getElementById('exportMp3Btn');
+
+            // Boutons IA
+            document.getElementById('analyzeNowBtn').addEventListener('click', analyzeMaster);
+            document.getElementById('autoOptimizeBtn').addEventListener('click', autoOptimize);
+            document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+
+            // ---------- INIT CONTEXT ----------
+            async function getContext() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') await audioContext.resume();
+                return audioContext;
+            }
+
+            // ---------- DÉCODAGE AUDIO ROBUSTE ----------
+            function decodeAudioFile(context, arrayBuffer) {
+                return new Promise((resolve, reject) => {
+                    context.decodeAudioData(arrayBuffer, 
+                        (buffer) => {
+                            console.log('Décodage réussi:', buffer);
+                            resolve(buffer);
+                        },
+                        (error) => {
+                            console.error('Erreur decodeAudioData:', error);
+                            reject(new Error('Format audio non supporté ou fichier corrompu'));
+                        }
+                    );
+                });
+            }
+
+            // ---------- MÉTRIQUES PRÉCISES ----------
+            function computeAccurateMetrics(buffer) {
+                if (!buffer) return { rms: -Infinity, lufs: -Infinity, peak: -Infinity };
+                
+                const numChannels = buffer.numberOfChannels;
+                const length = buffer.length;
+                let sumSq = 0;
+                let peak = 0;
+                
+                for (let ch = 0; ch < numChannels; ch++) {
+                    const data = buffer.getChannelData(ch);
+                    for (let i = 0; i < length; i++) {
+                        const absSample = Math.abs(data[i]);
+                        if (absSample > peak) peak = absSample;
+                        sumSq += data[i] * data[i];
+                    }
+                }
+                
+                const rms = 20 * Math.log10(Math.sqrt(sumSq / (length * numChannels)) + 1e-10);
+                const peakDB = 20 * Math.log10(peak + 1e-10);
+                const lufs = rms - 0.8;
+                
+                return { rms, lufs, peak: peakDB };
+            }
+
+            // ---------- FICHIER ORIGINAL ----------
+            async function loadOriginalFile(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                origName.innerText = file.name;
+                statusMsg.innerText = '⏳ Chargement original...';
+                
+                try {
+                    const ctx = await getContext();
+                    const arrayBuffer = await file.arrayBuffer();
+                    
+                    originalBuffer = await decodeAudioFile(ctx, arrayBuffer);
+                    
+                    const metrics = computeAccurateMetrics(originalBuffer);
+                    originalRMS = metrics.rms;
+                    originalLUFS = metrics.lufs;
+                    originalPeak = metrics.peak;
+                    
+                    document.getElementById('origRMS').innerText = originalRMS.toFixed(1) + ' dB';
+                    document.getElementById('origLUFS').innerText = originalLUFS.toFixed(1) + ' LUFS';
+                    document.getElementById('origPeak').innerText = originalPeak.toFixed(1) + ' dB';
+                    
+                    statusMsg.innerText = '✅ Original chargé avec succès';
+                    
+                    buildMasterChain(ctx);
+                    maybeEnableExports();
+                    
+                } catch (err) {
+                    console.error('Erreur chargement original:', err);
+                    statusMsg.innerText = '❌ Erreur: ' + err.message;
+                    origName.innerText = '— erreur —';
+                }
+            }
+
+            // ---------- FICHIER RÉFÉRENCE ----------
+            async function loadRefFile(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                refName.innerText = file.name;
+                statusMsg.innerText = '⏳ Chargement référence...';
+                
+                try {
+                    const ctx = await getContext();
+                    const arrayBuffer = await file.arrayBuffer();
+                    
+                    refBuffer = await decodeAudioFile(ctx, arrayBuffer);
+                    
+                    const metrics = computeAccurateMetrics(refBuffer);
+                    refRMS = metrics.rms;
+                    refLUFS = metrics.lufs;
+                    refPeak = metrics.peak;
+                    
+                    document.getElementById('refRMS').innerText = refRMS.toFixed(1) + ' dB';
+                    document.getElementById('refLUFS').innerText = refLUFS.toFixed(1) + ' LUFS';
+                    document.getElementById('refPeak').innerText = refPeak.toFixed(1) + ' dB';
+                    
+                    statusMsg.innerText = '✅ Référence chargée avec succès';
+                    
+                } catch (err) {
+                    console.error('Erreur chargement référence:', err);
+                    statusMsg.innerText = '❌ Erreur: ' + err.message;
+                    refName.innerText = '— erreur —';
+                }
+            }
+
+            // ---------- CHAÎNE MASTERING ----------
+            function buildMasterChain(context) {
+                if (!originalBuffer) return;
+                
+                if (inputGainNode) {
+                    try {
+                        inputGainNode.disconnect();
+                    } catch(e) {}
+                }
+                
+                const chain = createEffectChain(context, false);
+                inputGainNode = chain.inputGain;
+                eqLowFilter = chain.lowFilter;
+                eqMidFilter = chain.midFilter;
+                eqHighFilter = chain.highFilter;
+                compressor = chain.comp;
+                limiter = chain.lim;
+                outputGainNode = chain.outputGain;
+                analyserTime = chain.analyserT;
+                analyserFreq = chain.analyserF;
+
+                updateParamsToNodes();
+                startVisualization();
+            }
+
+            function createEffectChain(context, forOffline) {
+                const inputGain = new GainNode(context, { gain: dBToLinear(params.inputGain) });
+                const low = new BiquadFilterNode(context, { type: 'lowshelf', frequency: 80, gain: params.eqLow });
+                const mid = new BiquadFilterNode(context, { type: 'peaking', frequency: 1000, Q: 1.4, gain: params.eqMid });
+                const high = new BiquadFilterNode(context, { type: 'highshelf', frequency: 8000, gain: params.eqHigh });
+                const comp = new DynamicsCompressorNode(context, { 
+                    threshold: params.compThreshold, 
+                    ratio: params.compRatio, 
+                    attack: params.compAttack/1000, 
+                    release: params.compRelease/1000,
+                    knee: 3
+                });
+                const lim = new DynamicsCompressorNode(context, { 
+                    threshold: params.limiterThresh, 
+                    ratio: 20, 
+                    attack: 0.001, 
+                    release: 0.030,
+                    knee: 0
+                });
+                const outGain = new GainNode(context, { gain: dBToLinear(params.outputGain) });
+
+                inputGain.connect(low); 
+                low.connect(mid); 
+                mid.connect(high); 
+                high.connect(comp); 
+                comp.connect(lim); 
+                lim.connect(outGain);
+                
+                if (!forOffline) {
+                    const analyserT = new AnalyserNode(context, { fftSize: 2048, smoothingTimeConstant: 0.8 });
+                    const analyserF = new AnalyserNode(context, { fftSize: 2048, smoothingTimeConstant: 0.8 });
+                    outGain.connect(context.destination);
+                    outGain.connect(analyserT);
+                    outGain.connect(analyserF);
+                    return { inputGain, lowFilter: low, midFilter: mid, highFilter: high, comp, lim, outputGain: outGain, analyserT, analyserF };
+                } else {
+                    return { inputGain, lowFilter: low, midFilter: mid, highFilter: high, comp, lim, outputGain: outGain };
+                }
+            }
+
+            function dBToLinear(db) { return Math.pow(10, db/20); }
+
+            function updateParamsToNodes() {
+                if (!inputGainNode) return;
+                inputGainNode.gain.value = dBToLinear(params.inputGain);
+                eqLowFilter.gain.value = params.eqLow;
+                eqMidFilter.gain.value = params.eqMid;
+                eqHighFilter.gain.value = params.eqHigh;
+                compressor.threshold.value = params.compThreshold;
+                compressor.ratio.value = params.compRatio;
+                compressor.attack.value = params.compAttack/1000;
+                compressor.release.value = params.compRelease/1000;
+                limiter.threshold.value = params.limiterThresh;
+                outputGainNode.gain.value = dBToLinear(params.outputGain);
+            }
+
+            // ---------- PLAYBACK ----------
+            function stopAll() {
+                if (activeSource) {
+                    try { 
+                        activeSource.stop(); 
+                        activeSource.disconnect();
+                    } catch(e) {}
+                    activeSource = null;
+                }
+            }
+
+            playOrig.addEventListener('click', async () => {
+                stopAll();
+                if (!originalBuffer) {
+                    statusMsg.innerText = '⚠️ Aucun original chargé';
+                    return;
+                }
+                const ctx = await getContext();
+                const src = new AudioBufferSourceNode(ctx, { buffer: originalBuffer });
+                src.connect(ctx.destination);
+                src.start();
+                activeSource = src;
+                src.onended = () => { if(activeSource === src) activeSource = null; };
+            });
+
+            playRef.addEventListener('click', async () => {
+                stopAll();
+                if (!refBuffer) {
+                    statusMsg.innerText = '⚠️ Aucune référence chargée';
+                    return;
+                }
+                const ctx = await getContext();
+                const src = new AudioBufferSourceNode(ctx, { buffer: refBuffer });
+                src.connect(ctx.destination);
+                src.start();
+                activeSource = src;
+            });
+
+            playMaster.addEventListener('click', async () => {
+                stopAll();
+                if (!originalBuffer || !inputGainNode) {
+                    statusMsg.innerText = '⚠️ Original non chargé';
+                    return;
+                }
+                const ctx = await getContext();
+                const src = new AudioBufferSourceNode(ctx, { buffer: originalBuffer });
+                src.connect(inputGainNode);
+                src.loop = true;
+                src.start();
+                activeSource = src;
+            });
+
+            stopBtns.forEach(b => b.addEventListener('click', stopAll));
+
+            // ---------- VISUALISATION ----------
+            function startVisualization() {
+                if (animFrame) cancelAnimationFrame(animFrame);
+                
+                function draw() {
+                    if (!analyserTime || !analyserFreq) { 
+                        animFrame = requestAnimationFrame(draw); 
+                        return; 
+                    }
+                    
+                    const timeData = new Float32Array(analyserTime.fftSize);
+                    analyserTime.getFloatTimeDomainData(timeData);
+                    
+                    let sumSq = 0;
+                    let peak = 0;
+                    for (let i = 0; i < timeData.length; i++) {
+                        const absVal = Math.abs(timeData[i]);
+                        if (absVal > peak) peak = absVal;
+                        sumSq += timeData[i] * timeData[i];
+                    }
+                    
+                    const blockRMS = 20 * Math.log10(Math.sqrt(sumSq / timeData.length) + 1e-10);
+                    const blockPeak = 20 * Math.log10(peak + 1e-10);
+                    
+                    rmsHistory[historyIndex] = isFinite(blockRMS) ? blockRMS : -200;
+                    peakHistory[historyIndex] = isFinite(blockPeak) ? blockPeak : -200;
+                    historyIndex = (historyIndex + 1) % HISTORY_SIZE;
+                    
+                    let rmsSum = 0;
+                    let peakSum = 0;
+                    let validCount = 0;
+                    for (let i = 0; i < HISTORY_SIZE; i++) {
+                        if (rmsHistory[i] > -100) {
+                            rmsSum += rmsHistory[i];
+                            peakSum += peakHistory[i];
+                            validCount++;
+                        }
+                    }
+                    
+                    if (validCount > 0) {
+                        smoothedRMS = rmsSum / validCount;
+                        smoothedPeak = peakSum / validCount;
+                    }
+                    
+                    masterRMSelm.innerText = smoothedRMS.toFixed(1) + ' dB';
+                    masterLUFSelm.innerText = (smoothedRMS - 0.8).toFixed(1) + ' LUFS';
+                    masterPeakElm.innerText = smoothedPeak.toFixed(1) + ' dB';
+                    
+                    if (smoothedPeak > -1) {
+                        masterPeakElm.className = 'meter bad';
+                    } else if (smoothedPeak > -3) {
+                        masterPeakElm.className = 'meter warning';
+                    } else {
+                        masterPeakElm.className = 'meter good';
+                    }
+                    
+                    if (smoothedRMS > -12) {
+                        masterRMSelm.className = 'meter warning';
+                    } else {
+                        masterRMSelm.className = 'meter good';
+                    }
+                    
+                    oscCtx.clearRect(0,0,oscCanvas.width,oscCanvas.height);
+                    oscCtx.strokeStyle = '#7fb0d0';
+                    oscCtx.lineWidth = 1.5;
+                    oscCtx.beginPath();
+                    const slice = oscCanvas.width / timeData.length;
+                    let x = 0;
+                    for (let i = 0; i < timeData.length; i+=2) {
+                        const y = ((timeData[i] * 0.5 + 0.5) * oscCanvas.height);
+                        if (i === 0) oscCtx.moveTo(x,y);
+                        else oscCtx.lineTo(x, Math.min(oscCanvas.height, Math.max(0, y)));
+                        x += slice * 2;
+                    }
+                    oscCtx.stroke();
+
+                    const freq = new Uint8Array(analyserFreq.frequencyBinCount);
+                    analyserFreq.getByteFrequencyData(freq);
+                    specCtx.clearRect(0,0,specCanvas.width,specCanvas.height);
+                    const barW = specCanvas.width / Math.min(freq.length, 512);
+                    specCtx.fillStyle = '#77aadd';
+                    for (let i = 0; i < Math.min(freq.length, 512); i+=2) {
+                        const h = (freq[i]/255) * specCanvas.height;
+                        specCtx.fillRect(i*barW, specCanvas.height-h, barW*2-1, h);
+                    }
+                    
+                    animFrame = requestAnimationFrame(draw);
+                }
+                draw();
+            }
+
+            // ---------- IA ASSISTANT ----------
+            function analyzeMaster() {
+                if (!originalBuffer || !refBuffer) {
+                    iaMessage.innerText = "🧠 Pour une analyse précise, chargez un original ET une référence.";
+                    return;
+                }
+                
+                const deltaRMS = smoothedRMS - refRMS;
+                const deltaPeak = smoothedPeak - refPeak;
+                
+                let advice = [];
+                
+                if (Math.abs(deltaRMS) < 1.5) {
+                    advice.push("✅ Niveau excellent (proche de la référence)");
+                } else if (smoothedRMS > refRMS + 2) {
+                    advice.push(`⚠️ Réduire OUTPUT GAIN de ${(smoothedRMS - refRMS).toFixed(1)} dB`);
+                } else if (smoothedRMS < refRMS - 3) {
+                    advice.push(`🔊 Augmenter OUTPUT GAIN de ${(refRMS - smoothedRMS).toFixed(1)} dB`);
+                }
+                
+                if (smoothedPeak > -1) {
+                    advice.push("⚠️ Crête trop haute - risque d'écrêtage");
+                }
+                
+                if (params.eqLow > 3) advice.push("🎸 Basses accentuées");
+                if (params.eqHigh > 4) advice.push("✨ Aigus brillants");
+                
+                iaMessage.innerText = "🧠 " + (advice.length ? advice.join(" · ") : "Ajustez l'égaliseur pour coller au spectre de la référence.");
+            }
+
+            function autoOptimize() {
+                if (!refBuffer || !originalBuffer) {
+                    iaMessage.innerText = "Chargez d'abord original et référence pour des réglages adaptés.";
+                    return;
+                }
+                
+                params.inputGain = 2.5;
+                params.eqLow = 1.8;
+                params.eqMid = -0.7;
+                params.eqHigh = 2.2;
+                params.compThreshold = -21;
+                params.compRatio = 4.2;
+                params.compAttack = 8;
+                params.compRelease = 120;
+                params.limiterThresh = -1.8;
+                params.outputGain = 1.2;
+                
+                updateSlidersFromParams();
+                updateParamsToNodes();
+                iaMessage.innerText = "✨ Réglages optimisés appliqués pour un master professionnel.";
+            }
+
+            function resetSettings() {
+                params.inputGain = 0;
+                params.eqLow = 0;
+                params.eqMid = 0;
+                params.eqHigh = 0;
+                params.compThreshold = -18;
+                params.compRatio = 4;
+                params.compAttack = 10;
+                params.compRelease = 150;
+                params.limiterThresh = -1.0;
+                params.outputGain = 0;
+                
+                updateSlidersFromParams();
+                updateParamsToNodes();
+                iaMessage.innerText = "↺ Réglages réinitialisés aux valeurs par défaut.";
+            }
+
+            function updateSlidersFromParams() {
+                const sliderIds = ['inputGain','eqLow','eqMid','eqHigh','compThreshold','compRatio','compAttack','compRelease','limiterThresh','outputGain'];
+                sliderIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = params[id];
+                    const span = document.getElementById(id+'Val');
+                    if (span) {
+                        let unit = ' dB';
+                        if (id.includes('Ratio')) unit = ':1';
+                        else if (id.includes('Attack') || id.includes('Release')) unit = ' ms';
+                        span.innerText = params[id].toFixed(1) + unit;
+                    }
+                });
+            }
+
+            function bindSliders() {
+                const sliderIds = ['inputGain','eqLow','eqMid','eqHigh','compThreshold','compRatio','compAttack','compRelease','limiterThresh','outputGain'];
+                sliderIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    const disp = document.getElementById(id+'Val');
+                    if (!el || !disp) return;
+                    
+                    el.addEventListener('input', (e) => {
+                        const v = parseFloat(e.target.value);
+                        params[id] = v;
+                        let unit = ' dB';
+                        if (id.includes('Ratio')) unit = ':1';
+                        else if (id.includes('Attack') || id.includes('Release')) unit = ' ms';
+                        disp.innerText = v.toFixed(1) + unit;
+                        updateParamsToNodes();
+                    });
+                });
+            }
+
+            // ---------- EXPORT ----------
+            async function renderOffline(asMp3) {
+                if (!originalBuffer) return;
+                statusMsg.innerText = '⏳ Rendu en cours...';
+                
+                try {
+                    const ctxOff = new OfflineAudioContext(originalBuffer.numberOfChannels, originalBuffer.length, originalBuffer.sampleRate);
+                    const src = new AudioBufferSourceNode(ctxOff, { buffer: originalBuffer });
+                    const chain = createEffectChain(ctxOff, true);
+                    src.connect(chain.inputGain);
+                    chain.outputGain.connect(ctxOff.destination);
+                    src.start();
+                    
+                    const rendered = await ctxOff.startRendering();
+                    const wavBlob = bufferToWavBlob(rendered);
+                    
+                    if (!asMp3) {
+                        const url = URL.createObjectURL(wavBlob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = 'mastered.wav'; a.click();
+                        URL.revokeObjectURL(url);
+                        statusMsg.innerText = '✅ WAV exporté';
+                    } else {
+                        try {
+                            const mp3 = await wavToMp3(rendered);
+                            const url = URL.createObjectURL(mp3);
+                            const a = document.createElement('a'); a.href = url; a.download = 'mastered.mp3'; a.click();
+                            URL.revokeObjectURL(url);
+                            statusMsg.innerText = '✅ MP3 exporté';
+                        } catch (mp3Err) {
+                            statusMsg.innerText = '❌ Erreur MP3';
+                        }
+                    }
+                } catch (err) {
+                    statusMsg.innerText = '❌ Erreur de rendu';
+                }
+            }
+
+            function bufferToWavBlob(buffer) {
+                const numChannels = buffer.numberOfChannels;
+                const sampleRate = buffer.sampleRate;
+                const bits = 16;
+                const samples = buffer.length;
+                const blockAlign = numChannels * 2;
+                const dataSize = samples * blockAlign;
+                
+                const arrayBuffer = new ArrayBuffer(44 + dataSize);
+                const view = new DataView(arrayBuffer);
+                
+                writeString(view, 0, 'RIFF');
+                view.setUint32(4, 36 + dataSize, true);
+                writeString(view, 8, 'WAVE');
+                writeString(view, 12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true);
+                view.setUint16(22, numChannels, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * blockAlign, true);
+                view.setUint16(32, blockAlign, true);
+                view.setUint16(34, bits, true);
+                writeString(view, 36, 'data');
+                view.setUint32(40, dataSize, true);
+                
+                const channels = [];
+                for (let ch = 0; ch < numChannels; ch++) {
+                    channels.push(buffer.getChannelData(ch));
+                }
+                
+                let offset = 44;
+                for (let i = 0; i < samples; i++) {
+                    for (let ch = 0; ch < numChannels; ch++) {
+                        let sample = Math.max(-1, Math.min(1, channels[ch][i]));
+                        let int16 = sample < 0 ? sample * 32768 : sample * 32767;
+                        view.setInt16(offset, int16, true);
+                        offset += 2;
+                    }
+                }
+                
+                return new Blob([arrayBuffer], { type: 'audio/wav' });
+            }
+
+            function writeString(view, offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            }
+
+            function wavToMp3(buffer) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const numChannels = buffer.numberOfChannels;
+                        const sampleRate = buffer.sampleRate;
+                        const samples = buffer.length;
+                        const channels = [];
+                        for (let ch = 0; ch < numChannels; ch++) {
+                            channels.push(buffer.getChannelData(ch));
+                        }
+                        
+                        const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 192);
+                        const mp3Data = [];
+                        const blockSize = 1152;
+                        
+                        for (let i = 0; i < samples; i += blockSize) {
+                            const curSize = Math.min(blockSize, samples - i);
+                            const sampleBlock = new Int16Array(curSize * numChannels);
+                            
+                            for (let ch = 0; ch < numChannels; ch++) {
+                                for (let j = 0; j < curSize; j++) {
+                                    let val = Math.max(-1, Math.min(1, channels[ch][i + j]));
+                                    sampleBlock[j * numChannels + ch] = val < 0 ? val * 32768 : val * 32767;
+                                }
+                            }
+                            
+                            const mp3buf = mp3encoder.encodeBuffer(sampleBlock);
+                            if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf));
+                        }
+                        
+                        const mp3End = mp3encoder.flush();
+                        if (mp3End.length > 0) mp3Data.push(new Uint8Array(mp3End));
+                        
+                        resolve(new Blob(mp3Data, { type: 'audio/mp3' }));
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            }
+
+            function maybeEnableExports() {
+                if (originalBuffer) {
+                    exportWav.disabled = false;
+                    exportMp3.disabled = false;
+                }
+            }
+
+            // Initialisation
+            bindSliders();
+            exportWav.disabled = true;
+            exportMp3.disabled = true;
+
+            exportWav.addEventListener('click', () => renderOffline(false));
+            exportMp3.addEventListener('click', () => renderOffline(true));
+
+            window.addEventListener('beforeunload', () => {
+                if (activeSource) activeSource.stop();
+                if (animFrame) cancelAnimationFrame(animFrame);
+            });
+        })();
+    </script>
+</body>
+</html>
