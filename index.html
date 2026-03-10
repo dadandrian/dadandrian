@@ -2,135 +2,106 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎨🎵 Creative Hub | Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+<title>Creative Music Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body { font-family: 'Inter', sans-serif; background: #0f0f1f; color: #f0f0ff; }
-.nav-tab { transition: 0.2s; cursor: pointer; }
-.nav-tab:hover { color: #c084fc; }
-.active-tab { border-b-2 border-purple-500 text-purple-400; }
-.tool-card { transition: all 0.15s; border: 1px solid #444; }
-.tool-card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-color: #c084fc; }
+
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+color:white;
+text-align:center;
+margin:0;
+padding:0;
+}
+
+header{
+padding:40px;
+font-size:32px;
+font-weight:bold;
+}
+
+.container{
+display:flex;
+justify-content:center;
+gap:40px;
+flex-wrap:wrap;
+padding:40px;
+}
+
+.card{
+background:#111827;
+padding:40px;
+border-radius:20px;
+width:260px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+transition:0.3s;
+cursor:pointer;
+}
+
+.card:hover{
+transform:scale(1.05);
+background:#1f2937;
+}
+
+.icon{
+font-size:50px;
+margin-bottom:20px;
+}
+
+a{
+text-decoration:none;
+color:white;
+}
+
+footer{
+margin-top:50px;
+padding:20px;
+font-size:12px;
+opacity:0.7;
+}
+
 </style>
 </head>
-<body class="flex flex-col min-h-screen">
 
-<header class="bg-gradient-to-r from-purple-800 to-indigo-900 p-6 flex justify-between items-center shadow-lg">
-<h1 class="text-2xl font-bold"><i class="fas fa-layer-group mr-2"></i> Creative Hub Dashboard</h1>
-<nav class="flex gap-6">
-<span class="nav-tab active-tab" data-tab="mastering">🎛️ Mastering</span>
-<span class="nav-tab" data-tab="midi">🎵 MIDI → Solfa</span>
-<span class="nav-tab" data-tab="tools">🛠️ Every Day Tools</span>
-</nav>
+<body>
+
+<header>
+🎵 Creative Music AI Tools
 </header>
 
-<main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
+<div class="container">
 
-<!-- MASTERING -->
-<section id="mastering" class="tab-content block">
-<h2 class="text-xl font-semibold mb-4">🎛️ Mastering / Audio Tools</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+<a href="mastering.html">
+<div class="card">
+<div class="icon">🎚️</div>
+<h2>Mastering</h2>
+<p>Audio mastering tools</p>
+</div>
+</a>
 
-<!-- exemple de carte Mastering -->
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<div class="flex justify-between"><span class="font-medium">Mastering VST Offline</span><span class="text-green-400 text-xs ml-2">gratuit</span></div>
-<p class="text-xs text-gray-300 mt-1">Pré-master, référence, correction dynamique</p>
-<a href="#" class="text-indigo-300 hover:underline flex items-center gap-1 mt-2">ouvrir <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
+<a href="midi-solfa.html">
+<div class="card">
+<div class="icon">🎼</div>
+<h2>MIDI → Solfa</h2>
+<p>Convert MIDI to Solfa choir</p>
+</div>
+</a>
+
+<a href="everyday-tools.html">
+<div class="card">
+<div class="icon">🚀</div>
+<h2>Every Day Tools</h2>
+<p>Daily AI creator tools</p>
+</div>
+</a>
+
 </div>
 
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<div class="flex justify-between"><span class="font-medium">Audio Analyzer AI</span><span class="text-green-400 text-xs ml-2">gratuit</span></div>
-<p class="text-xs text-gray-300 mt-1">Analyse et correction de mix</p>
-<a href="#" class="text-indigo-300 hover:underline flex items-center gap-1 mt-2">ouvrir <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
-</div>
-
-</div>
-</section>
-
-<!-- MIDI → SOLFA -->
-<section id="midi" class="tab-content hidden">
-<h2 class="text-xl font-semibold mb-4">🎵 MIDI → Solfa Chorale</h2>
-<div class="bg-[#1a1f33] rounded-3xl p-6 shadow-lg">
-<input type="file" id="midiFile" class="file-input px-4 py-2 rounded-xl bg-[#2f3760] text-white mb-3" accept=".mid,.midi">
-<div class="flex gap-3 mb-3">
-<label>BPM<input type="number" id="bpm" value="90" min="20" max="300" class="w-20 rounded-xl text-black px-2"></label>
-<label>Mesure<input type="number" id="meter" value="4" min="1" max="12" class="w-20 rounded-xl text-black px-2"></label>
-</div>
-<div class="flex gap-2 flex-wrap mb-4">
-<button onclick="convertMidi()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl">⟳ Convertir</button>
-<button onclick="toggleEdit()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl">✎ Éditer</button>
-<button onclick="saveScore()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl">💾 Sauvegarder</button>
-<button onclick="playMidi()" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-xl">▶ Lecture</button>
-<button onclick="stopMidi()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl">⏹ Stop</button>
-</div>
-<div id="score" class="score-container overflow-x-auto p-4 bg-[#10172a] rounded-2xl border border-[#414773]"></div>
-</div>
-</section>
-
-<!-- EVERYDAY TOOLS -->
-<section id="tools" class="tab-content hidden">
-<h2 class="text-xl font-semibold mb-4">🛠️ Every Day Creative Tools</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-
-<!-- Audio / Musique -->
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<span>🎵 Suno AI</span> <span class="text-green-400 text-xs ml-2">gratuit</span>
-<p class="text-xs text-gray-300 mt-1">Musique + paroles à partir d'un prompt</p>
-<a href="https://suno.com" target="_blank" class="text-indigo-300 hover:underline flex items-center gap-1 mt-2">ouvrir <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
-</div>
-
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<span>🖼️ Lexica</span> <span class="text-green-400 text-xs ml-2">gratuit</span>
-<p class="text-xs text-gray-300 mt-1">Moteur IA d'images</p>
-<a href="https://lexica.art" target="_blank" class="text-emerald-300 hover:underline flex items-center gap-1 mt-2">ouvrir <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
-</div>
-
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<span>🎬 Runway ML</span> <span class="text-green-400 text-xs ml-2">crédits gratuits</span>
-<p class="text-xs text-gray-300 mt-1">Génération vidéo par IA</p>
-<a href="https://app.runwayml.com" target="_blank" class="text-rose-300 hover:underline flex items-center gap-1 mt-2">créer <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
-</div>
-
-<div class="tool-card bg-[#1e1f33] p-4 rounded-2xl shadow-sm">
-<span>📸 Canva</span> <span class="text-green-400 text-xs ml-2">gratuit</span>
-<p class="text-xs text-gray-300 mt-1">Design posts, stories, templates</p>
-<a href="https://www.canva.com" target="_blank" class="text-orange-300 hover:underline flex items-center gap-1 mt-2">ouvrir <i class="fas fa-arrow-up-right-from-square text-xs"></i></a>
-</div>
-
-</div>
-</section>
-
-</main>
-
-<footer class="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 text-center text-gray-300 text-xs">
-⚡ Tous les outils sont gratuits — Dashboard Open Source — Mise à jour quotidienne
+<footer>
+Creative Hub • Powered by GitHub Pages
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi"></script>
-<script src="https://unpkg.com/tone"></script>
-<script>
-// --- TAB SWITCH ---
-const tabs = document.querySelectorAll('.nav-tab');
-const contents = document.querySelectorAll('.tab-content');
-tabs.forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    tabs.forEach(t=>t.classList.remove('active-tab'));
-    tab.classList.add('active-tab');
-    contents.forEach(c=>c.classList.add('hidden'));
-    document.getElementById(tab.dataset.tab).classList.remove('hidden');
-  });
-});
-
-// MIDI → SOLFA simple placeholder
-function convertMidi(){ alert("Conversion MIDI → Solfa ici !"); }
-function toggleEdit(){ alert("Mode édition activé !"); }
-function saveScore(){ alert("Partition sauvegardée !"); }
-function playMidi(){ alert("Lecture MIDI !"); }
-function stopMidi(){ alert("Stop MIDI !"); }
-</script>
 
 </body>
 </html>
