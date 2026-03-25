@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PeerChat - Chat P2P Style WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #121212;
+            height: 100vh;
+            overflow: hidden;
+            color: #e5e5e5;
+        }
+
+        /* Container principal */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            background: #0a0a0a;
+        }
+
+        /* Sidebar pour la connexion et les vidéos */
+        .sidebar {
+            width: 320px;
+            background: #1e1e1e;
+            border-right: 1px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .user-info {
+            padding: 20px;
+            background: #2a2a2a;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .user-id-section {
+            background: #252525;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .my-id {
+            background: #3a3a3a;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .my-id:hover {
+            background: #4a4a4a;
+        }
+
+        .connection-section {
+            background: #252525;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            color: #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #25D366;
+        }
+
+        button {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #128C7E;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            background: #2a2a2a;
+        }
+
+        .status.connected {
+            background: #25D36620;
+            color: #25D366;
+        }
+
+        /* Section vidéo */
+        .video-section {
+            padding: 20px;
+        }
+
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .video-wrapper {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+        }
+
+        .video-label {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        /* Zone de chat principale */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f0f;
+        }
+
+        .chat-header {
+            background: #1e1e1e;
+            padding: 20px;
+            border-bottom: 1px solid #2d2d2d;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.mine {
+            align-self: flex-end;
+            background: #25D366;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.theirs {
+            align-self: flex-start;
+            background: #2a2a2a;
+            color: #e5e5e5;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-file {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .message-file:hover {
+            background: #2a2a2a;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .file-size {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: #1e1e1e;
+            border-top: 1px solid #2d2d2d;
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 24px;
+            padding: 12px 18px;
+            font-size: 14px;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-button {
+            background: #3a3a3a;
+            flex: 1;
+        }
+
+        .file-button:hover {
+            background: #4a4a4a;
+        }
+
+        /* Scrollbar personnalisée */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: 40vh;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .user-info {
+                flex: 1;
+                min-width: 200px;
+            }
+            .video-section {
+                flex: 1;
+                min-width: 200px;
+            }
+            .video-container {
+                flex-direction: row;
+            }
+            .video-wrapper {
+                flex: 1;
+            }
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar gauche -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-id-section">
+                    <span class="label">📱 MON ID UNIQUE</span>
+                    <div class="my-id" id="myId" onclick="copyMyId()">Chargement...</div>
+                    <div style="font-size: 11px; color: #888; margin-top: 5px;">👆 Cliquez pour copier</div>
+                </div>
+                
+                <div class="connection-section">
+                    <span class="label">🔗 CONNECTER À UN AMI</span>
+                    <input type="text" id="peerIdInput" placeholder="Entrez l'ID de votre ami" />
+                    <button onclick="connectToPeer()">Se connecter</button>
+                    <div id="connectionStatus" class="status">⚪ Non connecté</div>
+                </div>
+            </div>
+
+            <div class="video-section">
+                <span class="label">🎥 VIDÉO CONFÉRENCE</span>
+                <div class="video-container">
+                    <div class="video-wrapper">
+                        <video id="localVideo" autoplay muted playsinline></video>
+                        <div class="video-label">Vous</div>
+                    </div>
+                    <div class="video-wrapper">
+                        <video id="remoteVideo" autoplay playsinline></video>
+                        <div class="video-label">Ami</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de chat principale -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2>💬 Chat sécurisé P2P</h2>
+                <div style="font-size: 12px; color: #888;">Messages et fichiers en temps réel</div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div class="message theirs" style="text-align: center; background: #1e1e1e;">
+                    👋 Bienvenue ! Copiez votre ID, partagez-le avec un ami, puis entrez son ID pour commencer à chatter.
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <div class="message-input-container">
+                    <input type="text" id="messageInput" class="message-input" placeholder="Tapez un message..." onkeypress="handleKeyPress(event)" />
+                    <button onclick="sendMessage()" style="width: auto; padding: 0 20px;">Envoyer</button>
+                </div>
+                <div class="file-input-group">
+                    <input type="file" id="fileInput" style="display: none;" onchange="sendFile()" />
+                    <button class="file-button" onclick="document.getElementById('fileInput').click()">📎 Envoyer Fichier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration et variables globales
+        let peer = null;
+        let currentPeerConnection = null; // PeerJS connection pour data
+        let currentCall = null; // Appel vidéo
+        let localStream = null;
+        let isConnected = false;
+        let remotePeerId = null;
+
+        // Éléments DOM
+        const myIdElement = document.getElementById('myId');
+        const peerIdInput = document.getElementById('peerIdInput');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+
+        // Initialisation de PeerJS avec serveur public
+        function initializePeer() {
+            // Générer un ID unique aléatoire pour éviter les collisions
+            const randomId = 'user_' + Math.random().toString(36).substr(2, 9);
+            peer = new Peer(randomId, {
+                host: '0.peerjs.com',
+                port: 443,
+                path: '/',
+                secure: true,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
+                }
+            });
+
+            peer.on('open', (id) => {
+                myIdElement.textContent = id;
+                showSystemMessage(`✅ Votre ID: ${id}`, 'system');
+                connectionStatus.textContent = '🟢 Prêt à se connecter';
+                connectionStatus.className = 'status';
+                
+                // Démarrer la caméra localement
+                startLocalCamera();
+            });
+
+            peer.on('error', (err) => {
+                console.error('Peer error:', err);
+                showSystemMessage(`❌ Erreur: ${err.type}`, 'error');
+            });
+
+            // Gestion des connexions entrantes (DataChannel)
+            peer.on('connection', (conn) => {
+                handleNewConnection(conn);
+            });
+
+            // Gestion des appels vidéo entrants
+            peer.on('call', (call) => {
+                handleIncomingCall(call);
+            });
+        }
+
+        // Démarrer la caméra locale
+        async function startLocalCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+                showSystemMessage('🎥 Caméra et microphone activés', 'system');
+            } catch (err) {
+                console.error('Camera error:', err);
+                showSystemMessage('⚠️ Impossible d\'accéder à la caméra/micro', 'error');
+            }
+        }
+
+        // Gérer une nouvelle connexion entrante
+        function handleNewConnection(conn) {
+            if (currentPeerConnection) {
+                conn.close();
+                showSystemMessage('Connexion refusée: déjà connecté', 'error');
+                return;
+            }
+
+            setupDataConnection(conn);
+            remotePeerId = conn.peer;
+            
+            // Répondre automatiquement à l'appel vidéo entrant si présent
+            // L'appel vidéo sera géré séparément via peer.on('call')
+        }
+
+        // Configurer la connexion data
+        function setupDataConnection(conn) {
+            currentPeerConnection = conn;
+            isConnected = true;
+            connectionStatus.textContent = `✅ Connecté à ${conn.peer}`;
+            connectionStatus.className = 'status connected';
+            showSystemMessage(`🔗 Connecté à ${conn.peer}`, 'system');
+
+            conn.on('data', (data) => {
+                handleReceivedData(data);
+            });
+
+            conn.on('close', () => {
+                handleDisconnection();
+            });
+
+            conn.on('error', (err) => {
+                console.error('Data connection error:', err);
+                showSystemMessage('❌ Erreur de connexion', 'error');
+            });
+        }
+
+        // Se connecter à un peer
+        function connectToPeer() {
+            const targetId = peerIdInput.value.trim();
+            if (!targetId) {
+                showSystemMessage('❌ Veuillez entrer un ID valide', 'error');
+                return;
+            }
+
+            if (targetId === peer.id) {
+                showSystemMessage('❌ Impossible de se connecter à soi-même', 'error');
+                return;
+            }
+
+            if (currentPeerConnection) {
+                showSystemMessage('❌ Déjà connecté. Déconnectez-vous d\'abord.', 'error');
+                return;
+            }
+
+            showSystemMessage(`🔄 Tentative de connexion à ${targetId}...`, 'system');
+            
+            const conn = peer.connect(targetId, {
+                reliable: true,
+                serialization: 'json'
+            });
+            
+            conn.on('open', () => {
+                setupDataConnection(conn);
+                remotePeerId = targetId;
+                // Lancer l'appel vidéo après connexion
+                startVideoCall(targetId);
+            });
+            
+            conn.on('error', (err) => {
+                console.error('Connection error:', err);
+                showSystemMessage(`❌ Impossible de se connecter à ${targetId}`, 'error');
+            });
+        }
+
+        // Démarrer un appel vidéo
+        function startVideoCall(peerId) {
+            if (!localStream) {
+                showSystemMessage('⚠️ Attente de la caméra...', 'system');
+                setTimeout(() => startVideoCall(peerId), 1000);
+                return;
+            }
+            
+            const call = peer.call(peerId, localStream);
+            handleCall(call);
+        }
+
+        // Gérer un appel entrant
+        function handleIncomingCall(call) {
+            if (!localStream) {
+                showSystemMessage('⚠️ Caméra non disponible pour répondre', 'error');
+                call.answer();
+                return;
+            }
+            
+            call.answer(localStream);
+            handleCall(call);
+            showSystemMessage('📞 Appel vidéo entrant accepté', 'system');
+        }
+
+        // Gérer l'appel (commun pour entrant/sortant)
+        function handleCall(call) {
+            currentCall = call;
+            call.on('stream', (remoteStream) => {
+                remoteVideo.srcObject = remoteStream;
+                showSystemMessage('📹 Flux vidéo distant établi', 'system');
+            });
+            
+            call.on('close', () => {
+                remoteVideo.srcObject = null;
+                showSystemMessage('📴 Appel vidéo terminé', 'system');
+            });
+            
+            call.on('error', (err) => {
+                console.error('Call error:', err);
+                showSystemMessage('❌ Erreur vidéo', 'error');
+            });
+        }
+
+        // Gérer la déconnexion
+        function handleDisconnection() {
+            if (currentPeerConnection) {
+                currentPeerConnection = null;
+            }
+            isConnected = false;
+            connectionStatus.textContent = '⚪ Déconnecté';
+            connectionStatus.className = 'status';
+            remoteVideo.srcObject = null;
+            showSystemMessage('🔌 Déconnecté', 'system');
+        }
+
+        // Gérer les données reçues
+        function handleReceivedData(data) {
+            if (data.type === 'text') {
+                addMessageToChat(data.content, false);
+                showNotification('Nouveau message', data.content);
+            } else if (data.type === 'file') {
+                receiveFile(data);
+                showNotification('Fichier reçu', data.fileName);
+            }
+        }
+
+        // Envoyer un message texte
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            if (!isConnected || !currentPeerConnection) {
+                showSystemMessage('❌ Non connecté. Connectez-vous d\'abord.', 'error');
+                return;
+            }
+            
+            const messageData = {
+                type: 'text',
+                content: text,
+                timestamp: Date.now()
+            };
+            
+            currentPeerConnection.send(messageData);
+            addMessageToChat(text, true);
+            messageInput.value = '';
+            messageInput.focus();
+        }
+
+        // Envoyer un fichier via DataChannel
+        function sendFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            if (!isConnected || !currentPeerConnection) {
+                showSystemMessage('❌ Non connecté. Connectez-vous d\'abord.', 'error');
+                return;
+            }
+            
+            // Limite de taille: 10MB (DataChannel peut gérer plus mais on reste raisonnable)
+            if (file.size > 10 * 1024 * 1024) {
+                showSystemMessage('❌ Fichier trop gros (max 10MB)', 'error');
+                fileInput.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const fileData = {
+                    type: 'file',
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileSize: file.size,
+                    data: e.target.result.split(',')[1], // Envoyer en base64 sans le préfixe
+                    timestamp: Date.now()
+                };
+                
+                currentPeerConnection.send(fileData);
+                addFileToChat(file.name, file.size, true);
+                showSystemMessage(`📤 Envoi de ${file.name}...`, 'system');
+                fileInput.value = '';
+            };
+            
+            reader.onerror = () => {
+                showSystemMessage('❌ Erreur de lecture du fichier', 'error');
+                fileInput.value = '';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        // Recevoir un fichier
+        function receiveFile(fileData) {
+            const blob = base64ToBlob(fileData.data, fileData.fileType);
+            const url = URL.createObjectURL(blob);
+            
+            addFileToChat(fileData.fileName, fileData.fileSize, false, url);
+            
+            // Proposer le téléchargement automatique via notification système
+            if (Notification.permission === 'granted') {
+                const downloadNotification = new Notification('Fichier reçu', {
+                    body: `Cliquez pour télécharger ${fileData.fileName}`,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/25/25284.png'
+                });
+                
+                downloadNotification.onclick = () => {
+                    downloadFile(url, fileData.fileName);
+                    downloadNotification.close();
+                };
+            }
+        }
+
+        // Ajouter un message texte au chat
+        function addMessageToChat(text, isMine) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isMine ? 'mine' : 'theirs'}`;
+            messageDiv.innerHTML = `<div>${escapeHtml(text)}</div><div style="font-size: 10px; opacity: 0.7; margin-top: 4px;">${new Date().toLocaleTimeString()}</div>`;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Ajouter un fichier au chat
+        function addFileToChat(fileName, fileSize, isMine, downloadUrl = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isMine ? 'mine' : 'theirs'} message-file`;
+            const sizeKB = (fileSize / 1024).toFixed(1);
+            const icon = getFileIcon(fileName);
+            
+            messageDiv.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-details">
+                        <div class="file-name">${escapeHtml(fileName)}</div>
+                        <div class="file-size">${sizeKB} KB</div>
+                    </div>
+                    <div>📥</div>
+                </div>
+                <div style="font-size: 10px; opacity: 0.7; margin-top: 4px;">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            if (!isMine && downloadUrl) {
+                messageDiv.style.cursor = 'pointer';
+                messageDiv.onclick = () => downloadFile(downloadUrl, fileName);
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Afficher les messages système
+        function showSystemMessage(msg, type = 'system') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message theirs';
+            messageDiv.style.background = '#1e1e1e';
+            messageDiv.style.textAlign = 'center';
+            messageDiv.style.fontSize = '12px';
+            messageDiv.innerHTML = `🔔 ${msg}`;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Utilitaires
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function copyMyId() {
+            const id = myIdElement.textContent;
+            navigator.clipboard.writeText(id).then(() => {
+                showSystemMessage('✅ ID copié dans le presse-papier !', 'system');
+            }).catch(() => {
+                alert('ID: ' + id);
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type: mimeType });
+        }
+
+        function downloadFile(url, fileName) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+        }
+
+        function getFileIcon(fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) return '🖼️';
+            if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) return '🎵';
+            if (['mp4', 'webm', 'avi', 'mov'].includes(ext)) return '🎬';
+            if (['pdf'].includes(ext)) return '📄';
+            if (['doc', 'docx'].includes(ext)) return '📝';
+            return '📎';
+        }
+
+        // Notifications système
+        function showNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/134/134914.png' });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(title, { body });
+                    }
+                });
+            }
+        }
+
+        // Initialisation
+        initializePeer();
+        
+        // Demander la permission pour les notifications
+        if ('Notification' in window) {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
